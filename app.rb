@@ -2,7 +2,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.require
 
-require './collect_config'
+require './config/db'
 
 get '/track' do
   doc = {
