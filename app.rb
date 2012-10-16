@@ -1,8 +1,4 @@
-require 'rubygems'
-require 'bundler'
-
-Bundler.require
-
+require 'sinatra'
 require './collect_config'
 
 get '/track' do
