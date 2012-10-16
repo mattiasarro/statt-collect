@@ -1,14 +1,31 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    addressable (2.3.2)
     bson (1.6.2)
     bson_ext (1.6.2)
       bson (~> 1.6.2)
     daemons (1.1.9)
     eventmachine (0.12.10)
+    excon (0.16.4)
+    heroku (2.32.8)
+      heroku-api (~> 0.3.5)
+      launchy (>= 0.3.2)
+      netrc (~> 0.7.7)
+      rest-client (~> 1.6.1)
+      rubyzip
+    heroku-api (0.3.5)
+      excon (~> 0.16.1)
+    launchy (2.1.2)
+      addressable (~> 2.3)
+    mime-types (1.19)
     mongo (1.6.2)
       bson (~> 1.6.2)
+    netrc (0.7.7)
     rack (1.4.1)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
+    rubyzip (0.9.9)
     sinatra (1.1.0)
       rack (~> 1.1)
       tilt (~> 1.1)
@@ -23,6 +40,7 @@ PLATFORMS
 
 DEPENDENCIES
   bson_ext
+  heroku
   mongo
   sinatra (= 1.1.0)
   thin

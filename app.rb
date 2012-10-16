@@ -3,11 +3,23 @@ require 'bundler'
 
 Bundler.require
 
+require './config'
+
 get '/track' do
-  db = Mongo::Connection.new.db('statt', :strict => false)
-  coll = db.collection('visits')
+  doc = {
+    ip: params[:ip],
+    user_id: params[:user_id],
+    time: Time.now
+  }
   
-  doc = {ip: params[:ip]}
-  coll.insert(doc)
+  
+  loads = db.collection('loads')
+  loads.insert(doc)
+  
   doc.to_s # display this
+end
+
+def db
+  connection = Mongo::Connection.from_uri(settings.db_uri)
+  connection.db(settings.db_name, :strict => false)
 end
