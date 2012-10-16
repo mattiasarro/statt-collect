@@ -3,7 +3,7 @@ require 'bundler'
 
 Bundler.require
 
-require './config'
+require './collect_config'
 
 get '/track' do
   doc = {
