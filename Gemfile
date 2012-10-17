@@ -6,3 +6,7 @@ gem 'unicorn'
 gem 'heroku'
 gem 'mongo'
 gem 'bson_ext'
+
+group :development do
+  gem 'shotgun'
+end

@@ -26,6 +26,8 @@ GEM
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rubyzip (0.9.9)
+    shotgun (0.9)
+      rack (>= 1.0)
     sinatra (1.1.0)
       rack (~> 1.1)
       tilt (~> 1.1)
@@ -42,5 +44,6 @@ DEPENDENCIES
   bson_ext
   heroku
   mongo
+  shotgun
   sinatra (= 1.1.0)
   unicorn
