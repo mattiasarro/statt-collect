@@ -5,12 +5,19 @@ Bundler.require
 require './config/db'
 
 get '/track' do
+  
+  time = Time.parse(params[:time]) || Time.now
+  
   doc = {
     ip: params[:ip],
-    user_id: params[:user_id],
-    time: Time.now
+    cl_user_id: params[:cl_user_id],
+    cookie_id: params[:cookie_id],
+    time: time,
+    
+    http_referer: params[:http_referer],
+    uri_string: params[:uri_string],
+    query_parameters: params[:query_parameters]
   }
-  
   
   loads = db.collection('loads')
   loads.insert(doc)
