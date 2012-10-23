@@ -3,7 +3,6 @@ source :rubygems
 ruby '1.9.3'
 gem 'sinatra', '1.1.0'
 gem 'unicorn'
-gem 'heroku'
 gem 'mongoid'
 gem 'bson_ext'
 
