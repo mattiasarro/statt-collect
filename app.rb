@@ -5,6 +5,16 @@ Bundler.require
 require './config/db'
 Mongoid.load!("config/mongoid.yml")
 
+set :public_folder, 'public'
+
+get '/track.png' do
+  
+  puts params
+  
+  content_type 'image/png'
+  File.read("pixel.png")
+end
+
 get '/track' do
   
   time = Time.parse(params[:time]) || Time.now
