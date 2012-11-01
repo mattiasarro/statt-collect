@@ -6,11 +6,56 @@ require './config/db'
 Mongoid.load!("config/mongoid.yml")
 
 set :public_folder, 'public'
+set :views, File.dirname(__FILE__) + '/views'
+
+# If 1st party cookie not set, user does a XmlHttpRequest
+get '/sites/:site_id/new_visitor.png' do
+  puts "GET /sites/#{params[:site_id]}/new_visitor.png?visitor_id=#{params[:visitor_id]}"
+  
+  @site = Site.find(params[:site_id])
+  
+  # # Could do this to support multiple domains:
+  # if cookie set
+  #   if visitor found
+  #     VisitorAlias.create(to_id: params[:visitor_id])
+  #   else
+  #     create new visitor
+  #     response.set_cookie("statt-#{@site.id}-visitor_id", 
+  #                         value: params[:visitor_id], 
+  #                         expires: 1.year.from_now)
+  #   end
+  # else # cookie not set
+  #   if visitor found
+  #     404
+  #   else
+  #     create visitor
+  #     set cookie
+  #   end
+  # end
+  
+  unless @site.visitors.find(params[:visitor_id])
+    create_visitor(@site.id, params[:visitor_id])
+    show_pixel
+  else
+    pass # 404 - visitor already exists
+  end
+end
 
 get '/track.png' do
-  
   puts params
-  
+  show_pixel
+end
+
+def create_visitor(site_id, visitor_id)
+  # Insert a new visitor embedded under the corresponding Site;
+  # need a raw MongoDB call - no way to set _id otherwise 
+  cmd = "db.sites.update({_id: ObjectId('#{site_id}')},{ '$push': { 'visitors': {_id: ObjectId('#{visitor_id}')}}},true);"
+  Site.collection.database.command("$eval" => cmd, "nolock" => true)
+end
+
+
+
+def show_pixel
   content_type 'image/png'
   File.read("pixel.png")
 end
@@ -43,6 +88,11 @@ end
 class Site
   include Mongoid::Document
   embeds_many :loads
+  embeds_many :visitors
+end
+class Visitor
+  include Mongoid::Document
+  embedded_in :site
 end
 class Load
   include Mongoid::Document

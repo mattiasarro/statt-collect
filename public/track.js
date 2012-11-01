@@ -3,33 +3,66 @@ var _statt = _statt || [];
     _statt = {
         image: new Image(),
         track: function () {
-            this.setCookie('statt-visitor_id', "new value");
+          if (!this.visitor_id()) {
+            this.set_visitor_id();
+          } else {
             var a = this.url();
             if (a) {
               this.image.src = a;
             }
+          }
         },
         push: function (a) {
             var b = a.shift();
             if (b == 'track') {
                 _statt.track()
-            }
+            } // else if b == 'event', etc.
         },
         url: function () {
-            var ret, script_tag = this.$('statt-tracker');
-            if (script_tag) {
-                ret = d.src.replace('/track.js', '/track.png');
-                ret += "?site_id=" + d.getAttribute('data-site-id');
+            var ret;
+            if (this.script_tag()) {
+                ret = this.base() + 'track.png';
+                ret += "?site_id=" + this.site_id();
+                ret += "&visitor_id=" + this.visitor_id();
                 ret += "&resource=" + this.resource();
                 ret += "&referrer=" + this.referrer();
                 ret += "&title=" + this.title();
                 ret += "&user_agent=" + this.agent();
-                ret += "&screenx=" + this.screenWidth();
-                ret += "&browserx=" + this.browserWidth();
-                ret += "&browsery=" + this.browserHeight();
+                ret += "&screenx=" + this.screen_width();
+                ret += "&browserx=" + this.browser_width();
+                ret += "&browsery=" + this.browser_height();
                 ret += "&timestamp=" + this.timestamp()
             }
             return ret;
+        },
+        get_new_id: function () {
+          return "50922b001b47f8a719055555";
+        },
+        set_visitor_id: function() {
+          var visitor_id = this.get_new_id();          
+          var get_url = this.base() + "sites/" + this.site_id() + "/new_visitor.png";
+          var img = new Image();
+          img.src = get_url + "?visitor_id=" + visitor_id;
+          img.onload = function () {
+            _statt.set_cookie('statt-visitor_id', visitor_id, 100);
+            
+            var a = _statt.url();// Do the actual tracking
+            if (a) {
+              _statt.image.src = a;
+            }
+          };
+        },
+        visitor_id: function () {
+          return this.get_cookie("statt-visitor_id");
+        },
+        base: function () {
+          return this.$('statt-tracker').src.replace("track.js", "");
+        },
+        site_id: function () {
+          return this.script_tag().getAttribute('data-site-id');
+        },
+        script_tag: function () {
+          return this.$('statt-tracker');
         },
         referrer: function () {
             try {
@@ -61,14 +94,14 @@ var _statt = _statt || [];
         title: function () {
             return (document.title && document.title != "") ? this.escape(document.title) : ''
         },
-        screenWidth: function () {
+        screen_width: function () {
             try {
                 return screen.width
             } catch (e) {
                 return 0
             }
         },
-        browserDimensions: function () {
+        browser_dimensions: function () {
             var a = 0,
                 b = 0;
             try {
@@ -88,11 +121,11 @@ var _statt = _statt || [];
                 height: b
             }
         },
-        browserWidth: function () {
-            return this.browserDimensions().width
+        browser_width: function () {
+            return this.browser_dimensions().width
         },
-        browserHeight: function () {
-            return this.browserDimensions().height
+        browser_height: function () {
+            return this.browser_dimensions().height
         },
         $: function (a) {
             if (document.getElementById) {
@@ -100,7 +133,7 @@ var _statt = _statt || [];
             }
             return null
         },
-        setCookie: function (a, b, d) {
+        set_cookie: function (a, b, d) {
             var f, c;
             b = escape(b);
             if (d) {
@@ -112,7 +145,7 @@ var _statt = _statt || [];
             }
             document.cookie = a + "=" + b + c + "; path=/"
         },
-        getCookie: function (a) {
+        get_cookie: function (a) {
             var b = a + "=",
                 d = document.cookie.split(';');
             for (var f = 0; f < d.length; f++) {
@@ -125,6 +158,15 @@ var _statt = _statt || [];
                 }
             }
             return null
+        },
+        http_object: function () {
+          try {return new XMLHttpRequest();}
+          catch (error) {}
+          try {return new ActiveXObject("Msxml2.XMLHTTP");}
+          catch (error) {}
+          try {return new ActiveXObject("Microsoft.XMLHTTP");}
+          catch (error) {}
+          throw new Error("Could not create HTTP request object.");
         }
     };
     _statt.track();

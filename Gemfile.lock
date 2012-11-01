@@ -41,6 +41,7 @@ PLATFORMS
 DEPENDENCIES
   bson_ext
   mongoid
+  moped
   shotgun
   sinatra (= 1.1.0)
   unicorn
