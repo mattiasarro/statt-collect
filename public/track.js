@@ -36,7 +36,11 @@ var _statt = _statt || [];
             return ret;
         },
         get_new_id: function () {
-          return "50922b001b47f8a719055555";
+          var timestamp = Math.floor(new Date().valueOf()).toString(16);
+          var one = Math.floor(Math.random()*1000000000000000).toString(16);
+          var two = Math.floor(Math.random()*1000000000000000).toString(16);
+          var ret = (timestamp+one+two).substring(0,24);
+          return ret;
         },
         set_visitor_id: function() {
           var visitor_id = this.get_new_id();          
