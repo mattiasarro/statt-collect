@@ -23,7 +23,7 @@ var _statt = _statt || [];
             if (this.script_tag()) {
                 ret = this.base() + 'track.png';
                 ret += "?visitor_id=" + this.visitor_id();
-                ret += "&resource=" + this.resource();
+                ret += "&uri_string=" + this.uri_string();
                 ret += "&http_referer=" + this.referer();
                 ret += "&title=" + this.title();
                 ret += "&user_agent=" + this.agent();
@@ -88,7 +88,7 @@ var _statt = _statt || [];
         escape: function (a) {
             return (typeof (encodeURIComponent) == 'function') ? encodeURIComponent(a) : escape(a)
         },
-        resource: function () {
+        uri_string: function () {
             return this.escape(document.location.href)
         },
         title: function () {

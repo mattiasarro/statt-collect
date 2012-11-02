@@ -44,11 +44,16 @@ end
 get '/sites/:site_id/track.png' do
   puts "GET /sites/#{params[:site_id]}/track.png?#{params}"
   
-  time = Time.now
+  if params[:time]
+    time = Time.parse(params[:time])
+  else
+    time = Time.now
+  end
+  
   
   doc = {
     visitor_id: params[:visitor_id],
-    resource: params[:resource],
+    uri_string: params[:uri_string],
     http_referer: params[:http_referer],
     title: params[:title],
     user_agent: params[:user_agent],
