@@ -22,16 +22,14 @@ var _statt = _statt || [];
             var ret;
             if (this.script_tag()) {
                 ret = this.base() + 'track.png';
-                ret += "?site_id=" + this.site_id();
-                ret += "&visitor_id=" + this.visitor_id();
+                ret += "?visitor_id=" + this.visitor_id();
                 ret += "&resource=" + this.resource();
-                ret += "&referrer=" + this.referrer();
+                ret += "&http_referer=" + this.referer();
                 ret += "&title=" + this.title();
                 ret += "&user_agent=" + this.agent();
                 ret += "&screenx=" + this.screen_width();
                 ret += "&browserx=" + this.browser_width();
                 ret += "&browsery=" + this.browser_height();
-                ret += "&timestamp=" + this.timestamp()
             }
             return ret;
         },
@@ -44,7 +42,7 @@ var _statt = _statt || [];
         },
         set_visitor_id: function() {
           var visitor_id = this.get_new_id();          
-          var get_url = this.base() + "sites/" + this.site_id() + "/new_visitor.png";
+          var get_url = this.base() + "new_visitor.png";
           var img = new Image();
           img.src = get_url + "?visitor_id=" + visitor_id;
           img.onload = function () {
@@ -60,7 +58,8 @@ var _statt = _statt || [];
           return this.get_cookie("statt-visitor_id");
         },
         base: function () {
-          return this.$('statt-tracker').src.replace("track.js", "");
+          var rep = "sites/" + this.site_id() + "/";
+          return this.$('statt-tracker').src.replace("track.js", rep);
         },
         site_id: function () {
           return this.script_tag().getAttribute('data-site-id');
@@ -68,7 +67,7 @@ var _statt = _statt || [];
         script_tag: function () {
           return this.$('statt-tracker');
         },
-        referrer: function () {
+        referer: function () {
             try {
                 a = top.document.referrer
             } catch (e1) {
@@ -91,9 +90,6 @@ var _statt = _statt || [];
         },
         resource: function () {
             return this.escape(document.location.href)
-        },
-        timestamp: function () {
-            return new Date().getTime()
         },
         title: function () {
             return (document.title && document.title != "") ? this.escape(document.title) : ''

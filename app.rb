@@ -41,8 +41,34 @@ get '/sites/:site_id/new_visitor.png' do
   end
 end
 
-get '/track.png' do
-  puts params
+get '/sites/:site_id/track.png' do
+  puts "GET /sites/#{params[:site_id]}/track.png?#{params}"
+  
+  time = Time.now
+  
+  doc = {
+    visitor_id: params[:visitor_id],
+    resource: params[:resource],
+    http_referer: params[:http_referer],
+    title: params[:title],
+    user_agent: params[:user_agent],
+    screenx: params[:screenx],
+    browserx: params[:browserx],
+    browsery: params[:browsery],
+    time: time,
+        
+    ip: params[:ip],
+    cl_user_id: params[:cl_user_id],
+    
+    uri_string: params[:uri_string],
+    query_parameters: params[:query_parameters]
+  }
+  
+  @site = Site.find(params[:site_id])
+  @site.loads.create(doc)
+  doc.to_s # display this
+  
+  
   show_pixel
 end
 
@@ -53,58 +79,68 @@ def create_visitor(site_id, visitor_id)
   Site.collection.database.command("$eval" => cmd, "nolock" => true)
 end
 
-
-
 def show_pixel
   content_type 'image/png'
   File.read("pixel.png")
 end
 
-get '/track' do
-  
-  time = Time.parse(params[:time]) || Time.now
-  
-  doc = {
-    ip: params[:ip],
-    cl_user_id: params[:cl_user_id],
-    cookie_id: params[:cookie_id],
-    time: time,
-    
-    http_referer: params[:http_referer],
-    uri_string: params[:uri_string],
-    query_parameters: params[:query_parameters]
-  }
-  
-  @site = Site.find(params[:site_id])
-  @site.loads.create(doc)
-  doc.to_s # display this
-end
 
 def db
   connection = Mongo::Connection.from_uri(settings.db_uri)
   connection.db(settings.db_name, :strict => false)
 end
 
-class Site
-  include Mongoid::Document
-  embeds_many :loads
-  embeds_many :visitors
-end
-class Visitor
-  include Mongoid::Document
-  embedded_in :site
-end
-class Load
-  include Mongoid::Document
-  embedded_in :site
-  
-  field :ip
-  field :cl_user_id # optional
-  field :cookie_id
-  field :time, type: Time
-  field :time_on_page, type: Integer # in seconds
-  
-  field :http_referer
-  field :uri_string
-  field :query_parameters
-end
+
+b = File.join(File.dirname(__FILE__), "..", "display", "app", "models")
+require File.join(b, "site")
+require File.join(b, "visitor")
+require File.join(b, "load")
+
+# class Site
+#   include Mongoid::Document
+#   embeds_many :loads
+#   embeds_many :visitors
+# end
+# class Visitor
+#   include Mongoid::Document
+#   embedded_in :site
+# end
+# class Load
+#   include Mongoid::Document
+#   embedded_in :site
+#   
+#   field :ip
+#   field :cl_user_id # optional
+#   field :cookie_id
+#   field :time, type: Time
+#   field :time_on_page, type: Integer # in seconds
+#   
+#   field :http_referer
+#   field :uri_string
+#   field :query_parameters
+#   
+#   after_create :set_previous
+#   after_create :set_cl_user_ids
+#   
+#   def set_cl_user_ids
+#     if self.cl_user_id
+#       visitor.add_to_set :cl_user_ids, self.cl_user_id
+#       visitor.current_cl_user_id = self.cl_user_id
+#       visitor.save
+#     end
+#   end
+#   
+#   def set_previous
+#     puts "setting previous for #{self.id}"
+#     previous_loads = visitor.loads.desc(:time)
+#     self.previous = previous_loads.find_by(uri_string: self.http_referer)
+#     if self.previous
+# 
+#       self.previous.next = self
+#       self.previous.time_on_page = (self.time - self.previous.time).round
+#       self.previous.save
+#       self.save
+#       puts "self.previous found: #{self.site.loads.find(self.id).previous_id}"
+#     end
+#   end
+# end
