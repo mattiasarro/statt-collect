@@ -1,21 +1,36 @@
 var http = require('http');
 var url = require("url");
-
-switch (process.argv[2]) {
+var env = process.argv[2];
+switch (env) {
   case "development":
-    var env = "development";
-    var dbname = "statt";
+    var mongo_host = "127.0.0.1";
+    var mongo_port = 27017;
+    var mongo_db = "statt";
+    
+    var host = "http://127.0.0.1";
     var port = process.env.PORT || 9393;
+    
     break;
   case "test":
-    var env = "test";
-    var dbname = "statt_test"
+    var mongo_host = "127.0.0.1";
+    var mongo_port = 27017;
+    var mongo_db = "statt_test"
+
+    var host = "http://127.0.0.1";
     var port = process.env.PORT || 9394;
+    
     break;
+  case "production":
   default:
-    var env = "production";
-    var dbname = "statt";
-    var port = process.env.PORT || 9393;
+    var mongo_host = "ds039737.mongolab.com";
+    var mongo_port = 39737;
+    var mongo_db = "heroku_app8278754";
+    
+    var mongo_user = "heroku_app8278754";
+    var mongo_pass = "taj0lgc7qv3nrcg0bj56t63see";
+    
+    var host = "http://statt-collect.herokuapp.com";
+    var port = process.env.PORT || 5000;
 }
 
 // /usr/local/share/npm/bin/supervisor statt-collect.js development
@@ -24,8 +39,15 @@ var Db = require('mongodb').Db;
 var Connection = require('mongodb').Connection;
 var Server = require('mongodb').Server;
 
-var server = new Server("127.0.0.1", 27017, {});
-var db = new Db(dbname, server, {safe:true});
+var server = new Server(mongo_host, mongo_port, {});
+var db = new Db(mongo_db, server, {safe:true});
+if (mongo_user) {
+  db.authenticate(mongo_user, mongo_pass, function(err, res){
+    if (err) {
+      console.log("unable to authenticate with user("+mongo_user+")");
+    }
+  });
+}
 
 var Collector = require('./libs/collector').Collector;
 var build_doc = require('./libs/collector').build_doc;
@@ -79,7 +101,7 @@ db.open(function(e, db) {
     });
   }).listen(port);
   console.log('Loading '+env+' environment.');
-  console.log('Server running at http://127.0.0.1:'+port+'/');
+  console.log('Server running at '+host+':'+port+'/');
 }); // end db
 
 function show(path, response) {
