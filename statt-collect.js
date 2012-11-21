@@ -3,34 +3,34 @@ var url = require("url");
 var env = process.argv[2];
 switch (env) {
   case "development":
-    var mongo_host = "127.0.0.1";
-    var mongo_port = 27017;
-    var mongo_db = "statt";
+    mongo_host = "127.0.0.1";
+    mongo_port = 27017;
+    mongo_db = "statt";
     
-    var host = "http://127.0.0.1";
-    var port = process.env.PORT || 9393;
+    host = "http://127.0.0.1";
+    port = process.env.PORT || 9393;
     
     break;
   case "test":
-    var mongo_host = "127.0.0.1";
-    var mongo_port = 27017;
-    var mongo_db = "statt_test"
-
-    var host = "http://127.0.0.1";
-    var port = process.env.PORT || 9394;
+    mongo_host = "127.0.0.1";
+    mongo_port = 27017;
+    mongo_db = "statt_test";
+    
+    host = "http://127.0.0.1";
+    port = process.env.PORT || 9394;
     
     break;
   case "production":
   default:
-    var mongo_host = "ds039737.mongolab.com";
-    var mongo_port = 39737;
-    var mongo_db = "heroku_app8278754";
+    mongo_host = "ds039737.mongolab.com";
+    mongo_port = 39737;
+    mongo_db = "heroku_app8278754";
     
-    var mongo_user = "heroku_app8278754";
-    var mongo_pass = "taj0lgc7qv3nrcg0bj56t63see";
+    mongo_user = "heroku_app8278754";
+    mongo_pass = "taj0lgc7qv3nrcg0bj56t63see";
     
-    var host = "http://statt-collect.herokuapp.com";
-    var port = process.env.PORT || 5000;
+    host = "http://statt-collect.herokuapp.com";
+    port = process.env.PORT || 5000;
 }
 
 // /usr/local/share/npm/bin/supervisor statt-collect.js development
@@ -40,14 +40,15 @@ var Connection = require('mongodb').Connection;
 var Server = require('mongodb').Server;
 
 var server = new Server(mongo_host, mongo_port, {});
-var db = new Db(mongo_db, server, {safe:true});
-if (mongo_user) {
-  db.authenticate(mongo_user, mongo_pass, function(err, res){
-    if (err) {
-      console.log("unable to authenticate with user("+mongo_user+")");
-    }
-  });
-}
+var db = new Db(mongo_db, server, {safe:true}, function(err,res){
+  if (mongo_user) {
+    db.authenticate(mongo_user, mongo_pass, function(err, res){
+      if (err) {
+        console.log("unable to authenticate with user("+mongo_user+")");
+      }
+    });
+  }
+});
 
 var Collector = require('./libs/collector').Collector;
 var build_doc = require('./libs/collector').build_doc;
