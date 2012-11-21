@@ -1,0 +1,1 @@
+web: node statt-collect.js production

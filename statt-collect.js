@@ -5,17 +5,17 @@ switch (process.argv[2]) {
   case "development":
     var env = "development";
     var dbname = "statt";
-    var port = 9393;
+    var port = process.env.PORT || 9393;
     break;
   case "test":
     var env = "test";
     var dbname = "statt_test"
-    var port = 9394;
+    var port = process.env.PORT || 9394;
     break;
   default:
     var env = "production";
     var dbname = "statt";
-    var port = 9393;
+    var port = process.env.PORT || 9393;
 }
 
 // /usr/local/share/npm/bin/supervisor statt-collect.js development
