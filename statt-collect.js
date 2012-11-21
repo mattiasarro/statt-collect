@@ -40,21 +40,19 @@ var Connection = require('mongodb').Connection;
 var Server = require('mongodb').Server;
 
 var server = new Server(mongo_host, mongo_port, {});
-var db = new Db(mongo_db, server, {safe:true}, function(err,res){
-  if (mongo_user) {
-    db.authenticate(mongo_user, mongo_pass, function(err, res){
-      if (err) {
-        console.log("unable to authenticate with user("+mongo_user+")");
-      }
-    });
-  }
-});
 
+var db = new Db(mongo_db, server, {safe:true});
 var Collector = require('./libs/collector').Collector;
 var build_doc = require('./libs/collector').build_doc;
 var pixel = require('./libs/pixel');
 
 db.open(function(e, db) {
+  db.authenticate(mongo_user, mongo_pass, function(err, res){
+    if (err) {
+      console.log("unable to authenticate with user "+ mongo_user);
+    }
+  });
+  
   http.createServer(function (request, response) {
     var pathname = url.parse(request.url).pathname;
     var attr = url.parse(request.url, true)["query"];
