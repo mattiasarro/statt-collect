@@ -40,28 +40,49 @@ get '/sites/:site_id/track.png' do
   @time = @time.strftime("%F %T")
   
   @site = Site.find(params[:site_id])
-  if @site
-    cmd  = "db.site_#{@site.id}_loads.insert({"
-    cmd += "'visitor_id': ObjectId('#{params[:visitor_id]}'),"
-    cmd += "'uri_string': '#{params[:uri_string]}'," if params[:uri_string]
-    cmd += "'http_referer': '#{params[:http_referer]}'," if params[:http_referer]
-    cmd += "'title': '#{params[:title]}'," if params[:title]
-    cmd += "'user_agent': '#{params[:user_agent]}'," if params[:user_agent]
-    cmd += "'screenx': '#{params[:screenx]}'," if params[:screenx]
-    cmd += "'browserx': '#{params[:browserx]}'," if params[:browserx]
-    cmd += "'browsery': '#{params[:browsery]}'," if params[:browsery]
-    cmd += "'ip': '#{request.ip}',"
-    cmd += "'time': new ISODate('#{@time}'),"
-    cmd += "'cl_user_id': '#{params[:cl_user_id]}'," if params[:cl_user_id]
-    cmd += "'query_parameters': '#{params[:query_parameters]}'," if params[:query_parameters]
+  @visitor = @site.visitors.find(params[:visitor_id])
+  if @site and @visitor
+    previous_loads = @visitor.loads.desc(:time)
+    previous = previous_loads.find_by(uri_string: params[:http_referer])
+    load_id = insert_load(previous)
+    if previous
+      top = load.time - previous.time
+      previous.update_attributes(next_id: load_id, time_on_page: top)
+    end
     
-    cmd += "'site_id': ObjectId('#{@site.id}')"
-    cmd += "});"
-    
-    Site.collection.database.command("$eval" => cmd, "nolock" => true)
+    if params[:cl_user_id]
+      @visitor.update_attributes(current_cl_user_id: params[:cl_user_id])
+      @visitor.add_to_set :cl_user_ids, params[:cl_user_id]
+    end
   end
   
   show_pixel
+end
+
+def previous
+  
+end
+
+def insert_load(prev=nil)
+  cmd  = "db.site_#{@site.id}_loads.insert({"
+  cmd += "'visitor_id': ObjectId('#{params[:visitor_id]}'),"
+  cmd += "'previous_id': ObjectId('#{prev.id}')," if prev
+  cmd += "'uri_string': '#{params[:uri_string]}'," if params[:uri_string]
+  cmd += "'http_referer': '#{params[:http_referer]}'," if params[:http_referer]
+  cmd += "'title': '#{params[:title]}'," if params[:title]
+  cmd += "'user_agent': '#{params[:user_agent]}'," if params[:user_agent]
+  cmd += "'screenx': '#{params[:screenx]}'," if params[:screenx]
+  cmd += "'browserx': '#{params[:browserx]}'," if params[:browserx]
+  cmd += "'browsery': '#{params[:browsery]}'," if params[:browsery]
+  cmd += "'ip': '#{request.ip}',"
+  cmd += "'time': new ISODate('#{@time}'),"
+  cmd += "'cl_user_id': '#{params[:cl_user_id]}'," if params[:cl_user_id]
+  cmd += "'query_parameters': '#{params[:query_parameters]}'," if params[:query_parameters]
+  
+  cmd += "'site_id': ObjectId('#{@site.id}')"
+  cmd += "});"
+  
+  Site.collection.database.command("$eval" => cmd, "nolock" => true)
 end
 
 def show_pixel
