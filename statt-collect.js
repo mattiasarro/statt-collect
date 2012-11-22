@@ -1,6 +1,7 @@
 var http = require('http');
 var url = require("url");
 var env = process.argv[2];
+var mongo_user; // to be able to check if (mongo_user)
 switch (env) {
   case "development":
     mongo_host = "127.0.0.1";
@@ -47,11 +48,13 @@ var build_doc = require('./libs/collector').build_doc;
 var pixel = require('./libs/pixel');
 
 db.open(function(e, db) {
-  db.authenticate(mongo_user, mongo_pass, function(err, res){
-    if (err) {
-      console.log("unable to authenticate with user "+ mongo_user);
-    }
-  });
+  if (mongo_user) {
+    db.authenticate(mongo_user, mongo_pass, function(err, res){
+      if (err) {
+        console.log("unable to authenticate with user "+ mongo_user);
+      }
+    });
+  }
   
   http.createServer(function (request, response) {
     var pathname = url.parse(request.url).pathname;
@@ -65,7 +68,6 @@ db.open(function(e, db) {
       db.collection(visitors_coll, {safe:false}, function(e, visitors) {
         if (e) { console.log("ERROR "+e); }
         var collector = new Collector(loads,visitors);
-        
         
         switch (pathname) {
           case "/track.js":

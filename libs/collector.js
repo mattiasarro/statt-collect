@@ -1,6 +1,6 @@
 var BSON = require('mongodb').BSONPure;
 function oid(id) {
-  return(BSON.ObjectID.createFromHexString(id));
+  return(BSON.ObjectID.createFromHexString(id.toString()));
 }
 
 function Collector (loads,visitors) {
@@ -12,7 +12,7 @@ function Collector (loads,visitors) {
     var attr = parsed["query"];
     
     doc = {
-      "_id": attr["visitor_id"],
+      "_id": oid(attr["visitor_id"]),
       "site_id": oid(attr["site_id"])
     }
     visitors.insert(doc, {safe:false});
@@ -82,12 +82,19 @@ function Collector (loads,visitors) {
 
   this.update_visitor = function (load) {
     if (load["cl_user_id"]) {
-      q = {"_id": load["visitor_id"]};
+      q = {"_id": oid(load["visitor_id"])};
       u = {
         $set:      { "current_cl_user_id": load["cl_user_id"] },
         $addToSet: { "cl_user_ids": load["cl_user_id"] }
       };
-      visitors.update(q,u,{safe:false});
+      
+      visitors.update(q,u,{safe:true}, function(err, records){
+        if (err) {
+          console.log("something went wrong "+ err);
+        } else {
+          console.log("updating visitor successful! = " + records);          
+        }
+      });
     }
   }
 
